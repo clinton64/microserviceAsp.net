@@ -11,8 +11,8 @@ namespace Catalog.API.Controllers
     public class CatalogController : ControllerBase
     {
         private readonly IProductRepository _productRepository;
-        private readonly ILogger _logger;
-        public CatalogController(IProductRepository productRepository, ILogger logger)
+        private readonly ILogger<CatalogController> _logger;
+        public CatalogController(IProductRepository productRepository, ILogger<CatalogController> logger)
         {
             _productRepository = productRepository;
             _logger = logger;
@@ -41,26 +41,22 @@ namespace Catalog.API.Controllers
             return Ok(product);
         }
 
-        [Route("[action/{Category}", Name ="GetProductByCategory")]
+        [Route("[action]/{category}", Name = "GetProductByCategory")]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<Product>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<Product>>> GetProductByCategory(string category)
         {
             var products = await _productRepository.GetProductByCategory(category);
-            if(products == null)
-            {
-                _logger.LogError($"product with id : {category} not found");
-                return NotFound();
-            }
             return Ok(products);
         }
 
         [HttpPost]
         [ProducesResponseType(typeof(Product), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> CreateProduct([FromBody] Product product)
+        public async Task<ActionResult<Product>> CreateProduct([FromBody] Product product)
         {
             await _productRepository.CreateProduct(product);
-            return CreatedAtRoute("GetProduct", new {id = product.Id}, product);
+
+            return CreatedAtRoute("GetProduct", new { id = product.Id }, product);
         }
 
 
